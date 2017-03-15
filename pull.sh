@@ -39,45 +39,67 @@ export EC2_HOME=`pwd`/ec2-api-tools
 export AWS_ACCESS_KEY=`cat aws_access.private`
 export AWS_SECRET_KEY=`cat aws_secret.private`
 
-# do we already have data?
-if [ -e "data.newest" ];
-then
-    # grab the most recent entry timestamp (e.g., 2017-02-02T11:45:34-0800)
-    NEWEST_TS=`head -20 data.newest | awk -F'\t' '{print $3}' | sort -r | head -1`
-    echo "existing data found: most recent timestamp is $NEWEST_TS"
-else
-    unset NEWEST_TS
-    echo "no existing data found, starting from the beginning (otherwise symlink 'data.newest' to the most recent file)"
-    echo "note: the initial data pull can take a while (~1 hour)"
-fi
+# to get the available regions:
+#
+#   ec2-describe-regions | awk {'print $2'} | tr '\n' ' '
+#
+# `ec2-describe-regions` does take some time, so it's easier to
+# update it when it has changed
+REGIONS=( ap-south-1 eu-west-2 eu-west-1 ap-northeast-2 ap-northeast-1 sa-east-1
+    ca-central-1 ap-southeast-1 ap-southeast-2 eu-central-1 us-east-1 us-east-2
+    us-west-1 us-west-2 )
 
-# we can only grab the last 90 days of data: if the most recent timestamp is
-# more than 90 days ago then we're essentially starting from scratch.
-FN_TEMP=data.`date -Iseconds`.temp
-echo "starting data refresh on `date -Iseconds`."
-if [ ! -z "$NEWEST_TS" ];
-then
-    # only get the diff, but there will be some overlap regardless
-    $EC2_HOME/bin/ec2-describe-spot-price-history \
-        --start-time $NEWEST_TS \
-        > $FN_TEMP
-else
-    $EC2_HOME/bin/ec2-describe-spot-price-history \
-        > $FN_TEMP
-fi
+TS="date -Iseconds"
 
-# if the data refresh is finished, then move the files around and update
-# symlinks.
-FN=data.`date -Iseconds`
-if [ $? -eq 0 ];
-then
-    mv $FN_TEMP $FN # filename (e.g., data.2017-01-01T01:01:01-0800)
-    ln -sfn $FN data.newest # update symlink
+# we could parallelize this loop, but it's best to naturally throttle
+# so we don't unduly burden their servers
+for region in "${REGIONS[@]}"
+do
+    echo "`$TS` $region starting"
 
-    NEWEST_TS=`head -20 data.newest | awk -F'\t' '{print $3}' | sort -r | head -1`
-    echo "finished on `date -Iseconds`. most recent entry is $NEWEST_TS."
-else
-    echo "something went wrong."
-fi
+    # do we already have data?
+    DATA_NEWEST="data.$region.newest"
+    if [ -e $DATA_NEWEST ];
+    then
+        # grab the most recent entry timestamp (e.g., 2017-02-02T11:45:34-0800)
+        NEWEST_TS=`head -20 $DATA_NEWEST | awk -F'\t' '{print $3}' | sort -r | head -1`
+        echo "`$TS` $region existing data found: most recent timestamp is $NEWEST_TS"
+    else
+        unset NEWEST_TS
+        echo "`$TS` $region no existing data found, starting from the beginning (otherwise symlink 'data.$region.newest' to the most recent file)"
+        echo "`$TS` $region note: the initial data pull can take a while (~1 hour)"
+    fi
+
+    # we can only grab the last 90 days of data: if the most recent timestamp is
+    # more than 90 days ago then we're essentially starting from scratch.
+    FN_TEMP=data.$region.`date -Iseconds`.temp
+    echo "`$TS` $region starting data refresh"
+    if [ ! -z "$NEWEST_TS" ];
+    then
+        # only get the diff, but there will be some overlap regardless
+        $EC2_HOME/bin/ec2-describe-spot-price-history \
+            --region $region \
+            --start-time $NEWEST_TS \
+            > $FN_TEMP
+    else
+        $EC2_HOME/bin/ec2-describe-spot-price-history \
+            --region $region \
+            > $FN_TEMP
+    fi
+
+    # if the data refresh is finished, then move the files around and update
+    # symlinks.
+    FN=data.$region.`date -Iseconds`
+    if [ $? -eq 0 ];
+    then
+        mv $FN_TEMP $FN # filename (e.g., data.us-east-1.2017-01-01T01:01:01-0800)
+        ln -sfn $FN data.$region.newest # update symlink
+
+        NEWEST_TS=`head -20 $DATA_NEWEST | awk -F'\t' '{print $3}' | sort -r | head -1`
+        echo "`$TS` $region finished. most recent entry is $NEWEST_TS."
+    else
+        echo "`$TS` $region something went wrong."
+    fi
+done
 
 exit 0

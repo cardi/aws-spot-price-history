@@ -16,7 +16,20 @@ the updated data.
 3. Run `pull.sh` and optionally install it in your `crontab`
 
 The first run will grab all possible historic data (90 days, ~25 million
-entries, ~2 GB uncompressed), so it will take a while.
+entries, ~2 GB uncompressed) across all 14 regions, so it will take a while.
+
+## Data Format
+
+Data will be stored in files named in the following format:
+
+    data.REGION.YYYY-MM-DDThh:mm:ss±hh:mm
+
+For example:
+
+    data.us-east-1.2017-02-21T00:14:33-08:00
+    data.ap-south-1.2017-03-15T15:52:17-07:00
+
+See `ec2-describe-spot-price-history` for the format of the data file itself.
 
 ## TODO
 
