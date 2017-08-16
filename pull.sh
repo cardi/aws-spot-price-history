@@ -19,7 +19,7 @@
 # easiest way automate this is to install this in your crontab:
 #
 # run five minutes after midnight, every day
-# 5 0 * * * /path/to/aws-spot-price-history/test.sh >> /path/to/aws-spot-price-history/log.txt
+# 5 0 * * * /path/to/aws-spot-price-history/pull.sh >> /path/to/aws-spot-price-history/log.txt
 
 # to be crontab compatible
 cd $(dirname $0)
@@ -44,7 +44,7 @@ export AWS_SECRET_KEY=`cat aws_secret.private`
 #   ec2-describe-regions | awk {'print $2'} | tr '\n' ' '
 #
 # `ec2-describe-regions` does take some time, so it's easier to
-# update it when it has changed
+# update the variable when it has changed
 REGIONS=( ap-south-1 eu-west-2 eu-west-1 ap-northeast-2 ap-northeast-1 sa-east-1
     ca-central-1 ap-southeast-1 ap-southeast-2 eu-central-1 us-east-1 us-east-2
     us-west-1 us-west-2 )
