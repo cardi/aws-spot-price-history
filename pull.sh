@@ -39,6 +39,9 @@ export EC2_HOME=`pwd`/ec2-api-tools
 export AWS_ACCESS_KEY=`cat aws_access.private`
 export AWS_SECRET_KEY=`cat aws_secret.private`
 
+# where do you want the data?
+export DATA_DIR=data
+
 # to get the available regions:
 #
 #   ec2-describe-regions | awk {'print $2'} | tr '\n' ' '
@@ -50,6 +53,22 @@ REGIONS=( ap-south-1 eu-west-2 eu-west-1 ap-northeast-2 ap-northeast-1 sa-east-1
     us-west-1 us-west-2 )
 
 TS="date -Iseconds"
+
+# check if data directory exists
+if [ -d "$DATA_DIR" ];
+then
+    # $DATA_DIR exists and is a directory (or a symlink to one), cd into it
+    cd $DATA_DIR
+elif [ ! -e "$DATA_DIR" ];
+then
+    # nothing named $DATA_DIR exists, mkdir then cd into it
+    mkdir $DATA_DIR
+    cd $DATA_DIR
+else
+    # something that isn't a directory named "$DATA_DIR" exists, exit
+    echo "`$TS` $DATA_DIR exists and isn't a directory, exiting..."
+    exit 1
+fi
 
 # we could parallelize this loop, but it's best to naturally throttle
 # so we don't unduly burden their servers
