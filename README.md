@@ -38,7 +38,7 @@ See `ec2-describe-spot-price-history` for the format of the data file itself.
 
 ## License
 
-    Copyright 2017 Calvin Ardi
+    Copyright 2019 Calvin Ardi
     
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

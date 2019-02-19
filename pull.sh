@@ -2,7 +2,7 @@
 
 # Filename: pull.sh
 # 
-# Copyright 2017 Calvin Ardi
+# Copyright 2019 Calvin Ardi
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ export DATA_DIR=data
 #
 # `ec2-describe-regions` does take some time, so it's easier to
 # update the variable when it has changed
-REGIONS=( ap-south-1 eu-west-3 eu-west-2 eu-west-1 ap-northeast-2 ap-northeast-1 sa-east-1
-    ca-central-1 ap-southeast-1 ap-southeast-2 eu-central-1 us-east-1 us-east-2
-    us-west-1 us-west-2 )
+REGIONS=( eu-north-1 ap-south-1 eu-west-3 eu-west-2 eu-west-1 ap-northeast-2
+    ap-northeast-1 sa-east-1 ca-central-1 ap-southeast-1 ap-southeast-2
+    eu-central-1 us-east-1 us-east-2 us-west-1 us-west-2 )
 
 TS="date -Iseconds"
 
