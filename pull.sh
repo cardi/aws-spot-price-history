@@ -24,7 +24,7 @@
 # to be crontab compatible
 cd $(dirname $0)
 
-export JAVA_HOME=/usr/lib/jvm/java/jre
+export JAVA_HOME=/usr/lib/jvm/java
 
 # if you don't have the ec2-api-tools already, run the following in
 # the directory this script is in:
